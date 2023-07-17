@@ -1,3 +1,5 @@
+using System.DirectoryServices;
+
 namespace HacerParejas
 {
     public partial class Form1 : Form
@@ -24,13 +26,30 @@ namespace HacerParejas
         // Método de evento del temporizador.
         private void TimeEvent(object sender, EventArgs e)
         {
-            // EN INSTANTES...
+            cuentaRegresiva--; // Se inicializa en cuenta regresiva el temporizador.
+
+            lblTimeLeft.Text = " Tiempo restante: " + cuentaRegresiva;
+
+            if (cuentaRegresiva < 1) // Cuando llega a 0 el temporizador...
+            {
+                GameOver("Se acabó el tiempo, Perdió la partida! :("); // Perdió la partida.
+
+                // Crearemos un ciclo foreach mediante un algoritmo que no visualice primero las imágenes extraídas de un archivo o de un directorio.
+
+                foreach (PictureBox x in imagenes)
+                {
+                    if (x.Tag != null)
+                    {
+                        x.Image = Image.FromFile("pics/" + (string)x.Tag + ".png"); // Las imágenes tienen que estar en formato .png.
+                    }
+                }
+            }
         }
 
         // Método de evento de reiniciar el juego.
         private void RestartGameEvent(object sender, EventArgs e)
         {
-            // EN INSTANTES...
+            RestartGame(); // Llamado del método de reinicio para este método.
         }
 
         // Método para cargar imágenes.
@@ -77,6 +96,56 @@ namespace HacerParejas
         private void NuevaFoto_Click(object? sender, EventArgs e)
         {
             // throw new NotImplementedException(); // Excepción no controlada.
+
+            // Cuando termina la partida...
+
+            if (gameOver)
+            {
+                // No se registrará un click si se acaba la partida.
+                return;
+            }
+
+            // Si se juega durante la primera oportunidad...
+
+            if (primeraOportunidad == null)
+            {
+                // Esto debe de hacerlo con la primera imagen.
+                imagenA = sender as PictureBox;
+
+                // Se reconocerá desde la sección del archivo "pics" las fotos de las figuras.
+
+                if (imagenA.Tag != null && imagenA.Image == null) // Si es una imagen pero no una etiqueta.
+                {
+                    imagenA.Image = Image.FromFile("pics/" + (string)imagenA.Tag + ".png"); // La imagen extraída de un archivo tiene que estar en formato .png.
+                    primeraOportunidad = (string)imagenA.Tag; // Esto se asocia con la primera oportunidad al jugar.
+                }
+            }
+
+            // En caso contrario si hacemos otro intento...
+
+            else 
+            
+            if (ultimaOportunidad == null)
+            {
+                // Esto debe de hacerlo con la segunda imagen.
+                 imagenB = sender as PictureBox;
+
+                // Se reconocerá desde la sección del archivo "pics" las fotos de las figuras.
+
+                 if (imagenB.Tag != null && imagenB.Image == null) // Si es una imagen pero no una etiqueta.
+                 {
+
+                    imagenB.Image = Image.FromFile("pics/" + (string)imagenB.Tag + ".png"); // La imagen extraída de un archivo tiene que estar en formato .png.
+                    ultimaOportunidad = (string)imagenB.Tag; // Esto se asocia con la última oportunidad al jugar.
+                 }
+            }
+
+            // En caso contrario si es que no se cumplen con ninguna de estas dos condiciones...
+
+            else
+            {
+                CheckPictures(imagenA, imagenB); // Se revisan las dos parejas de imágenes al mismo tiempo.
+            }
         }
 
         // Método para reiniciar el juego.
@@ -99,8 +168,8 @@ namespace HacerParejas
             }
 
             intentos = 0; // Inicializa el número de intentos.
-            lblStatus.Text = "Mismatched: " + intentos + " times."; // Mismatched n times.
-            lblTimeLeft.Text = "Time Left: " + tiempoTotal; // Time Left: 30 seconds.
+            lblStatus.Text = "Emparejaste: " + intentos + " veces."; // Emparejaste n veces.
+            lblTimeLeft.Text = "Tiempo restante: " + tiempoTotal; // Tiempo restante: 30 segundos.
             gameOver = false; // Que empiece el juego.
             Temporizador.Start(); // Comienza con un contador de tiempo en segundos.
             cuentaRegresiva = tiempoTotal; // El tiempo comienza en cuenta regresiva.
@@ -109,14 +178,45 @@ namespace HacerParejas
         // Método para revisar imágenes.
         private void CheckPictures(PictureBox A, PictureBox B)
         {
-            // EN INSTANTES...
+            if (primeraOportunidad == ultimaOportunidad) // Si se juegan al mismo tiempo con las parejas de imágenes...
+            {
+                A.Tag = null; // Imagen A.
+                B.Tag = null; // Imagen B.
+            }
+            else // En caso contrario...
+            {
+                intentos++; // La cantidad de intentos se incrementa.
+                lblStatus.Text = "Emparejaste " + intentos + " veces."; // Emparejaste n veces.
+            }
+
+            primeraOportunidad = null; // Primera oportunidad.
+            ultimaOportunidad = null; // Segunda y última oportunidad.
+
+            // Crearemos un ciclo foreach para agregar imágenes en una lista.
+
+            foreach (PictureBox pics in imagenes.ToList())
+            {
+                if (pics.Tag != null) // Cuando no se etiqueta una imagen pero sí se asocia con esta misma.
+                {
+                    pics.Image = null;
+                }
+            }
+
+            // Ahora vamos a comprobar si todos los elementos se han resuelto.
+
+            if (imagenes.All(o => o.Tag == imagenes[0].Tag))
+            {
+                GameOver("Felicitaciones, has ganado la partida! :)");
+            }
         }
 
         // Método para terminar la partida.
 
-        private void GameOver()
+        private void GameOver(string msg)
         {
-            // EN INSTANTES...
+            Temporizador.Stop(); // Paraliza el tiempo.
+            gameOver = true; // Se acaba la partida.
+            MessageBox.Show(msg + " Presiona el botón de Reiniciar para jugar otra partida.", "Esto sería infinito... ");
         }
     }
 }
