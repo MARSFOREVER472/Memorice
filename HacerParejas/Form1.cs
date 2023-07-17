@@ -82,7 +82,28 @@ namespace HacerParejas
         // Método para reiniciar el juego.
         private void RestartGame()
         {
-            // EN INSTANTES...
+            // Aleatoriza la lista original.
+
+            var randomList = numbers.OrderBy(x => Guid.NewGuid()).ToList();
+
+            // Asigna la lista aleatoria con respecto a la original.
+
+            numbers = randomList;
+
+            // Crearemos un ciclo for para importar fotos.
+
+            for (int i = 0; i < imagenes.Count; i++)
+            {
+                imagenes[i].Image = null; // Sin imágenes importadas.
+                imagenes[i].Tag = numbers[i].ToString(); // Imágenes se asocian con números al emparejar por cada movimiento.
+            }
+
+            intentos = 0; // Inicializa el número de intentos.
+            lblStatus.Text = "Mismatched: " + intentos + " times."; // Mismatched n times.
+            lblTimeLeft.Text = "Time Left: " + tiempoTotal; // Time Left: 30 seconds.
+            gameOver = false; // Que empiece el juego.
+            Temporizador.Start(); // Comienza con un contador de tiempo en segundos.
+            cuentaRegresiva = tiempoTotal; // El tiempo comienza en cuenta regresiva.
         }
 
         // Método para revisar imágenes.
